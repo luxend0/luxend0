@@ -1,5 +1,5 @@
 # Regenerate assets/banner.svg:
-#   V=16.38.0; mkdir -p /tmp/si && for s in linux go hyprland proxmox rust react debian nodedotjs qt nginx typescript wayland cloudflare python vite archlinux cplusplus blender mysql gnubash nuxt sqlite threedotjs; do curl -s -o /tmp/si/$s.svg https://cdn.jsdelivr.net/npm/simple-icons@$V/icons/$s.svg; done
+#   V=16.38.0; mkdir -p /tmp/si && for s in $(python3 -c 'import re;print(re.search(r"ORDER = \"\"\"(.*?)\"\"\"",open("tools/banner.py").read(),re.S).group(1))'); do curl -s -o /tmp/si/$s.svg https://cdn.jsdelivr.net/npm/simple-icons@$V/icons/$s.svg; done
 #   python3 -I tools/banner.py /tmp/si assets/banner.svg
 # Builds the animated profile banner: name + role in front, slowly drifting
 # rows of monochrome brand icons (simple-icons, CC0) over the whole background.
@@ -7,9 +7,14 @@
 import re, sys, pathlib
 
 icons_dir, out = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2])
-ORDER = ["linux", "go", "hyprland", "proxmox", "rust", "react", "debian", "nodedotjs", "qt", "nginx",
-         "typescript", "wayland", "cloudflare", "python", "vite", "archlinux", "cplusplus", "blender",
-         "mysql", "gnubash", "nuxt", "sqlite", "threedotjs"]
+ORDER = """
+linux go hyprland react mysql proxmox rust wayland vuedotjs mariadb debian nodedotjs qt nuxt
+postgresql archlinux typescript kitty vite redis gentoo javascript fishshell tailwindcss sqlite
+ubuntu python zsh threedotjs sequelize fedora gnubash blender express tauri kde cplusplus spotify
+socketdotio expo nginx lua git vitest discord caddy php github webgpu discorddotjs cloudflare
+webassembly wordpress roblox letsencrypt html5 stripe robloxstudio docker css ollama qemu
+homeassistant raspberrypi pm2 flatpak wine steam
+""".split()
 W, H, CELL, SIZE = 840, 210, 52, 22
 ROWS = [22, 64, 106, 148, 190]          # icon centre lines
 ACCENT = {(1, 4), (3, 11), (4, 2)}      # (row, col): the few icons drawn in blue
@@ -30,7 +35,7 @@ for r, cy in enumerate(ROWS):
     uses = []
     for tile in (0, 1):                 # two identical tiles, so the loop has no seam
         for c in range(COLS):
-            slug = ORDER[(c + r * 5) % len(ORDER)]
+            slug = ORDER[(c + r * COLS) % len(ORDER)]  # each row continues the list
             x = tile * TILE + c * CELL + (CELL // 2 if r % 2 else 0) + (CELL - SIZE) / 2
             cls = "a" if (r, c) in ACCENT else "i"
             uses.append(f'<use href="#{slug}" x="{x:.0f}" y="{cy - SIZE / 2:.0f}" width="{SIZE}" height="{SIZE}" class="{cls}"/>')
